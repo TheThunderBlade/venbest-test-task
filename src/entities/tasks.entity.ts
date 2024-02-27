@@ -16,5 +16,5 @@ export class Tasks {
     endTime: Date;
 
     @OneToMany(() => Jobs, (job) => job.taskId)
-    job: Jobs;
+    job: Jobs[];
 }

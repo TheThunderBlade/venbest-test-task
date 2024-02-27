@@ -41,23 +41,28 @@ export class JobsService {
 
     async getList(percent?: number) {
         try {
-            const jobs = await this.jobsRepository.find({
-                relations: ['userId', 'taskId'],
+            const tasks = await this.tasksRepository.find({
+                relations: ['job', 'job.userId'],
             });
-            const processedJobs = jobs.map((job) => {
-                const { startTime, endTime } = job;
-                const { costs } = job.taskId;
 
-                const jobInProgress = this._hoursBetween(startTime, endTime);
+            const processedTasks = tasks.map((task) => {
+                const { costs } = task;
 
-                const totalRate = job.userId.reduce((total: number, user: any) => total + this._totalRateForUser(user.rate, jobInProgress), 0);
+                let totalCost = 0;
+                for (const job of task.job) {
+                    const { startTime, endTime } = job;
+
+                    const jobInProgress = this._hoursBetween(startTime, endTime);
+                    const totalRate = job.userId.reduce((total: number, user: any) => total + this._totalRateForUser(user.rate, jobInProgress), 0);
+                    totalCost += totalRate;
+                }
 
                 return {
-                    ...job,
-                    costPercent: Number(((totalRate / costs) * 100).toFixed(1)),
+                    ...task,
+                    costPercent: Number(((totalCost / costs) * 100).toFixed(1)),
                 };
             });
-            return percent ? processedJobs.filter((job) => job.costPercent > percent) : processedJobs;
+            return percent ? processedTasks.filter((job) => job.costPercent > percent) : processedTasks;
         } catch (e) {
             throw new HttpException(
                 {

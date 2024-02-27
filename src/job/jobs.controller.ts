@@ -7,10 +7,10 @@ import { ICreateJob } from './interfaces/ICreateJob.interface';
 export class JobsController {
     constructor(private jobsService: JobsService) {}
 
-    @Get('/getJobList')
+    @Get('/getTaskList')
     async getList(@Query('percent') percent?: number): Promise<IResponceHelper> {
-        const users = await this.jobsService.getList(percent);
-        return { status: 200, data: users };
+        const tasks = await this.jobsService.getList(percent);
+        return { status: 200, data: tasks };
     }
 
     @Post('/createJob')
